@@ -1,8 +1,9 @@
 version: '3'
 
 services:
-  db:
+  dbase:
     image: postgres:alpine
+    container_name: postgres_db
     restart: always
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -17,8 +18,30 @@ services:
       - db:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
+  api:
+    build: ./api
+    container_name: rest_api
+    ports:
+      - "7000:7000"
+    depends_on:
+      - dbase
+    command: sh -c "/wait && /app/run_api.sh"
+    environment:
+      - WAIT_HOSTS=postgres:5432
+      - WAIT_HOSTS_TIMEOUT=300
+      - WAIT_SLEEP_INTERVAL=30
+      - WAIT_HOST_CONNECT_TIMEOUT=30
+    networks:
+      api_net:
+        aliases:
+          - api
+      database_new:
+        aliases:
+          - database
+
 networks:
   database_net:
+  api_net:
 
 volumes:
   db:
