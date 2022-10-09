@@ -1,4 +1,4 @@
-FROM python3.8:slim
+FROM python:3.8-slim
 
 WORKDIR /app
 
@@ -9,3 +9,7 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERS
 
 RUN chmod +x /wait
 RUN chmod +x /app/run_api.sh
+
+ADD ./requirements.txt ./requirements.txt
+RUN pip install --upgrade pip \
+    && pip install -r requirements.txt --no-cache-dir
